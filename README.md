@@ -2,19 +2,19 @@
 
 두더지를 잡자. 검지손가락을 두더지 위로 이동하면 잡을 수 있다.
 
-![두더지](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a285251e-5c3d-4dcd-a93f-46f4ac9b9d48/Untitled.png)
+![두더지](두더지.png)
 
 두더지
 
 특별한 두더지는 점수를 더 많이 받을 수 있다.
 
-![특별한 두더지](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/24951cb8-4f7d-4e12-b8e8-9f104066bd81/Untitled.png)
+![특별한 두더지](디그다.png)
 
 특별한 두더지
 
 그러나 땃쥐는 잡지 말자. 잡으면 큰 감점을 받을 수 있다.
 
-![땃쥐는 귀엽기 때문](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a96f2a6b-e4ed-4727-b520-6835487ee70e/Untitled.png)
+![땃쥐는 귀엽기 때문](땃쥐.png)
 
 땃쥐는 귀엽기 때문
 
