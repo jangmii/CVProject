@@ -19,7 +19,7 @@ enum State {
     STATE_BEFORE, STATE_NOW, STATE_AFTER
 };
 
-const int timeLimit = 32;
+const int timeLimit = 30;
 const int type_prop[10] = { 0,0,0,0,0,1,1,1,2,2 }; //종류별 확률
 const int point[3] = { +1, +3, -2 }; //두더지 종류별 포인트
 const int lv_num[3] = { 10, 15, 20 };
@@ -30,12 +30,14 @@ double duration = 2; //두더지 지속시간
 
 int main(int argc, char** argv)
 {
+    std::cout << "레벨 설정 중... => " << LEVEL <<"레벨\n";
     float thresh = 0.01;
     num = lv_num[LEVEL -1];
     duration = lv_duration[LEVEL -1];
 
     std::cout << "카메라 설정 중...\n";
-    VideoCapture cap(1, CAP_DSHOW);
+    VideoCapture cap(2, CAP_DSHOW);
+    if (!cap.isOpened()) cap = VideoCapture(1, CAP_DSHOW);
     if (!cap.isOpened()) cap = VideoCapture(0, CAP_DSHOW);
     if (!cap.isOpened()) {
         cerr << "Unable to connect to camera" << endl;
@@ -85,13 +87,41 @@ int main(int argc, char** argv)
         state[i] = STATE_BEFORE;
         stime[i] = disTime(gen);
     }
+//    VideoWriter video("Example.avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, Size(frameWidth, frameHeight));
+
     while (1) { //대기화면
         cap >> frame;
         flip(frame, frame, 1);
+
+        Mat inpBlob = blobFromImage(frame, 1.0 / 255, Size(inWidth, inHeight), Scalar(0, 0, 0), false, false);
+        net.setInput(inpBlob);
+        Mat output = net.forward();
+
+        int H = output.size[2];
+        int W = output.size[3];
+        Mat probMap(H, W, CV_32F, output.ptr(0, 8)); //8:검지 끝
+        resize(probMap, probMap, Size(frameWidth, frameHeight));
+
+        Point maxLoc;
+        double prob;
+        cv::minMaxLoc(probMap, 0, &prob, 0, &maxLoc);
+        if (prob > thresh) {
+            Point now((int)maxLoc.x, (int)maxLoc.y);
+            circle(frame, now, 8, Scalar(0, 255, 255), -1);    
+        }
+        
+        cv::putText(frame, cv::format("score: %d ", score), cv::Point(50, 50), cv::FONT_HERSHEY_SIMPLEX, .8, cv::Scalar(255, 100, 0), 2);
+        cv::putText(frame, cv::format("time left: %.2f sec", 30.00), cv::Point(350, 50), cv::FONT_HERSHEY_SIMPLEX, .8, cv::Scalar(0, 0, 200), 2);
         cv::putText(frame, "Press any key for start...", cv::Point(170, 450), cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 1);
         cv::imshow("두더지를 잡자", frame);
-        if (waitKey(1) != -1) break;
+ //       video.write(frame);
+        cv::setWindowProperty("두더지를 잡자", cv::WND_PROP_TOPMOST, 1);
+        int key = waitKey(1);
+        if (key == 27) exit(0);
+        else if(key != -1) break;
     }
+
+
     start = (double)cv::getTickCount();
     while (1)
     {
@@ -159,6 +189,7 @@ int main(int argc, char** argv)
         cv::putText(frame, cv::format("score: %d ", score), cv::Point(50, 50), cv::FONT_HERSHEY_SIMPLEX, .8, cv::Scalar(255, 100, 0), 2);
         cv::putText(frame, cv::format("time left: %.2f sec", timeLimit - timePassed), cv::Point(350, 50), cv::FONT_HERSHEY_SIMPLEX, .8, cv::Scalar(0, 0, 200), 2);
         cv::imshow("두더지를 잡자", frame);
+//        video.write(frame);
         char key = waitKey(1);
         if (key == 27)
             break;  
@@ -167,5 +198,6 @@ int main(int argc, char** argv)
     cout << "---------------------------------------\n";
     cout << "\n총점: " << score << endl;
     cap.release();
+//    video.release();
     return 0;
 }
